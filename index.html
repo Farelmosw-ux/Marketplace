@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Farel Marketplace</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <style>
+    :root{
+      --neon: #4ecdc4;
+      --accent: #60a5fa;
+      --glass: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;background:#000;font-family:'Montserrat',sans-serif;color:#fff;overflow-x:hidden;}
+    #particles-js{position:fixed;inset:0;z-index:-1;}
+
+    .site{max-width:1200px;margin:28px auto;padding:18px;}
+
+    header{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:44px 18px;border-radius:12px;text-align:center;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);
+    }
+    header h1{font-size:2.4rem;font-weight:800;letter-spacing:.6px;}
+    header p{color:rgba(255,255,255,0.85);margin-top:8px;}
+
+    .hero-video{width:100%;max-width:900px;margin:18px auto;border-radius:10px;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,0.6);}
+
+    .btn-main{
+      background: linear-gradient(45deg,var(--neon),var(--accent));
+      color:#041022;border:none;padding:10px 22px;border-radius:999px;font-weight:700;
+    }
+    .btn-main:hover{transform:translateY(-3px);filter:brightness(1.02);}
+
+    /* products grid */
+    #products{display:none;margin-top:20px;}
+    .card-prod{
+      background:var(--glass);border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);
+      transition:transform .22s ease, box-shadow .22s ease;height:100%;
+    }
+    .card-prod:hover{transform:translateY(-8px);box-shadow:0 18px 40px rgba(0,0,0,0.6),0 0 28px rgba(78,205,196,0.04);}
+    .prod-title{font-weight:800;color:#fff;}
+    .prod-desc{color:rgba(255,255,255,0.9);margin-top:8px;margin-bottom:10px;font-size:.95rem;}
+    .prod-price{color:#9bf7c6;font-weight:800;}
+
+    /* buy button style inside card */
+    .buy-btn{
+      display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--neon),var(--accent));color:#041022;font-weight:800;cursor:pointer;
+    }
+
+    /* payment area */
+    .pay-area{
+      margin:30px 0;padding:20px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      text-align:center;border:1px solid rgba(255,255,255,0.02);
+      transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease, padding 0.3s ease;
+      opacity: 1; 
+      transform: translateY(0);
+    }
+    /* Kelas untuk menyembunyikan area pembayaran */
+    .pay-area.hidden{
+      opacity: 0;
+      pointer-events: none;
+      height: 0; 
+      margin-top: 0; 
+      padding-top: 0;
+      padding-bottom: 0;
+      transform: translateY(20px);
+      overflow: hidden;
+    }
+    .pay-btn{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#fff;font-weight:700;margin:6px;cursor:pointer;transition:all .15s;}
+    .pay-btn img{width:40px;height:40px;border-radius:8px;background:#fff;padding:4px;}
+    .pay-btn:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,0.6),0 0 28px var(--neon);}
+
+    .number-show{margin-top:12px;font-weight:800;color:var(--neon);}
+
+    /* FOOTER MODIFIED: Mengurangi margin-top agar lebih dekat dengan konten di atasnya */
+    footer{margin-top:0px;text-align:center;color:rgba(255,255,255,0.65);padding:10px 6px;}
+
+    /* QR popup (glow futuristik) */
+    .qris-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;}
+    .qris-back{position:absolute;inset:0;background:rgba(2,6,23,0.75);backdrop-filter:blur(6px);}
+    .qris-card{position:relative;z-index:2;width:94%;max-width:460px;padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(6,8,16,0.96), rgba(10,12,20,0.98));border:1px solid rgba(78,205,196,0.08);box-shadow:0 30px 90px rgba(78,205,196,0.06);transform:scale(.8);opacity:0;transition:all .28s cubic-bezier(.2,.9,.2,1);}
+    .qris-card.show{transform:scale(1);opacity:1;}
+    .qris-glow{position:absolute;inset:-8px;z-index:1;border-radius:16px;filter:blur(28px);background:radial-gradient(60% 60% at 10% 10%, rgba(78,205,196,0.14), transparent 12%),radial-gradient(60% 60% at 90% 90%, rgba(96,165,250,0.10), transparent 12%);pointer-events:none;}
+    .qris-img{display:block;margin:10px auto;max-width:360px;width:92%;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.04);}
+    /* Tombol close di QRIS pop-up */
+    .qris-close{display:inline-block;margin-top:12px;padding:10px 16px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--neon),var(--accent));color:#041022;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(78,205,196,0.08);}
+    .qris-title{font-weight:800;color:#eaffff;margin-bottom:6px;text-align:center;}
+
+    .toast-msg{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:rgba(0,0,0,0.75);color:#fff;padding:10px 16px;border-radius:999px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,0.6);}
+
+    @media (max-width:768px){
+      header{padding:28px 12px;}
+      .pay-btn img{width:34px;height:34px;}
+    }
+  </style>
+</head>
+<body>
+  <div id="particles-js"></div>
+
+  <div class="site container">
+    <header>
+      <h1>Farel Marketplace</h1>
+      <p>20 - PRODUCTS FAREL SEMUA TERJAMIN 100% AMAN BISA TANYA TANYA ADMIN DULU</p>
+    </header>
+
+    <div class="hero-video">
+      <video autoplay muted loop playsinline style="width:100%;display:block;">
+        <source src="https://i.top4top.io/m_3587q721l1.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="text-center my-3">
+      <button id="btnToggle" class="btn btn-main">Tampilkan Produk</button>
+    </div>
+
+    <section id="products" class="row g-4" style="display:none;">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">PANEL UNLIMITED</div>
+          <div class="prod-desc">NO LAG NO DELAY BERGARANSI 15H SPEK R16 FREE SC BUG</div>
+          <div class="prod-price price">Rp 7.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('PANEL UNLIMITED')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">RESSELER PANEL</div>
+          <div class="prod-desc">GB BAKAL DIURUS TERUS NO DELAY NO PT PT BEBAS CREAT PANEL</div>
+          <div class="prod-price price">Rp 12.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('RESSELER PANEL')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">ADMIN PANEL</div>
+          <div class="prod-desc">BISA CREAT ADP NO PT PT NO LAG NO DELAY SPEK R16 </div>
+          <div class="prod-price price">Rp 15.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('ADMIN PANEL')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">MURBUG VIP</div>
+          <div class="prod-desc">BISA BUG NOMOR ORANG SEPUASNYA ADMIN ON 24JAM SENDER AMAN ON TERUS</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('MURBUG VIP')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">PARTNER FAREL</div>
+          <div class="prod-desc">DAPET BASE APK SADAP DLL DIKASIH SC FREE VIP BUG WA DIKASIH ALAT HACKING VIP DLL</div>
+          <div class="prod-price price">Rp 25.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('PARTNER FAREL')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">MURUNBAND WA</div>
+          <div class="prod-desc">DIKASIH TUTOR UNBAND DAN DIKASIH TUTOR METODE METODE</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('MURUNBAND WA')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">MURNOKOS VIP</div>
+          <div class="prod-desc">SETIAP HARI DAPET NOKOS TERUS VIP NO BAYAR BAYAR</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('MURNOKOS VIP')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">MURSADAP HEADPHONE</div>
+          <div class="prod-desc">DAPET TUTOR SADAP DAN DIKASIH ALAT HACKING DAPET TOOLS DDOS</div>
+          <div class="prod-price price">Rp 12.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('MURSADAP HEADPHONE')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG VIONIX V15</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR GACOR BISA TESTI DULU </div>
+          <div class="prod-price price">Rp 20.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG VIONIX V15')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT THREE BROTHER V6</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR ANTI AMPAS BISA TESTI DULU</div>
+          <div class="prod-price price">Rp 30.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT THREE BROTHER V6')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG ASHEN CRAWLER V7</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR ANTI AMPAS BISA TESTI DULU </div>
+          <div class="prod-price price">Rp 20.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG ASHEN CRAWLER V7')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG OTAX FULL UPDATE VIP</div>
+          <div class="prod-desc">SC BUG PALING GACOR TANPA PIKIR SENDER ADA MENU COLONG SENDER</div>
+          <div class="prod-price price">Rp 45.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG OTAX FULL UPDATE VIP')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG XVALLOW V9</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR ANTI AMPAS BISA TESTI DULU</div>
+          <div class="prod-price price">Rp 25.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG XVALLOW V9')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG DEEP INVENTUS</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR ANTI AMPAS BISA TESTI DULU</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG DEEP INVENTUS')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SCRIPT BUG VANEGETA V15</div>
+          <div class="prod-desc">KEAMANAN SC 100% ANTI BACKDOR ANTI AMPAS BISA TESTI DULU</div>
+          <div class="prod-price price">Rp 20.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SCRIPT BUG VANEGETA V15')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">JASA BUAT SC MD</div>
+          <div class="prod-desc">BISA REQUEST TEMA DAN AUDIO COCOK BUAT JASHER COCOK BUAT ANAK JB</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('JASA BUAT SC MD')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">JASA BUAT WEB PHISING</div>
+          <div class="prod-desc">WEB PHISING SADAP KAMERA+LOKASI ATAU PHISING HACK AKUN GAME</div>
+          <div class="prod-price price">Rp 20.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('JASA BUAT WEB PHISING')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">JASBUG WA</div>
+          <div class="prod-desc">JASA BUG WA DIJAMIN CENTANG 1 KORBAN DAN BISA REQUEST SS AN</div>
+          <div class="prod-price price">Rp 5.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('JASBUG WA')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">JASA BUAT WEB JUALAN</div>
+          <div class="prod-desc">BISA REQUEST BACKGROUND DAN LAIN LAIN ATAU TEMA YANG MEWAH</div>
+          <div class="prod-price price">Rp 10.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('JASA BUAT WEB JUALAN')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card-prod">
+          <div class="prod-title">SEWA SC BUG 2 BULAN</div>
+          <div class="prod-desc">MINIMAL REQUEST SC 3×</div>
+          <div class="prod-price price">Rp 15.000</div>
+          <div style="margin-top:10px;">
+            <button class="buy-btn" onclick="buyNow('SEWA SC BUG 2 BULAN')">Beli Sekarang</button>
+          </div>
+        </div>
+      </div>
+      
+    </section>
+
+    <div id="payArea" class="pay-area">
+      <h4 style="font-weight:800;margin-bottom:6px;">Pembayaran — DANA • GoPay • QRIS</h4>
+      <div style="opacity:.92;margin-bottom:12px;">Pembayaran Bisa Dilakukan saat Chat Admin dan kirim Bukti Pembayaran</div>
+
+      <div class="d-flex justify-content-center flex-wrap">
+        <button class="pay-btn" onclick="copyNumber('081215212297','DANA')">
+          <img src="https://i.postimg.cc/7LJJTpd1/13dbafbf849af404cf61e28de61f8f78.jpg" alt="DANA">
+          DANA
+        </button>
+
+        <button class="pay-btn" onclick="copyNumber('081215212297','GoPay')">
+          <img src="https://i.postimg.cc/ryjszVsb/fa6ad42f710af94307383078f076d771.jpg" alt="GoPay">
+          GoPay
+        </button>
+
+        <button class="pay-btn" onclick="openQR(false)">
+          <img src="https://i.postimg.cc/L8gGfwb6/46a8b62068c12c11d1a6680e813e6556.jpg" alt="QRIS">
+          QRIS
+        </button>
+      </div>
+
+      <div class="number-show">Nomor aktif: <span id="numActive">081215212297</span></div>
+      <div style="margin-top:8px;color:rgba(255,255,255,0.72);font-size:.92rem;">Nomor akan otomatis tersalin saat klik DANA / GoPay.</div>
+    </div>
+
+    <footer>
+      <div>© <span id="year"></span> Farelmods — All products</div>
+      <div style="margin-top:6px;font-size:.92rem;"><a href="https://t.me/Farelmod" target="_blank" style="color:var(--neon);text-decoration:none;">t.me/Farelmod</a></div>
+    </footer>
+  </div>
+
+  <div id="qrisOverlay" class="qris-overlay" aria-hidden="true">
+    <div class="qris-back" onclick="closeQR()"></div>
+    <div class="qris-card" id="qrisCard" role="dialog" aria-modal="true">
+      <div class="qris-glow"></div>
+      <div style="position:relative; z-index:3; padding:8px 12px 16px;">
+        <div class="qris-title">Bayar <span id="productNameInQR" style="color: var(--accent);">Produk</span></div>
+        <div style="text-align:center; margin-bottom: 5px; font-weight: 600; color: #fff;">Total Bayar: <span id="paymentTotal" style="color: #9bf7c6;">Rp 0</span></div> 
+        <div style="text-align:center; margin-bottom: 10px; color: rgba(255,255,255,0.8);">SCAN QR UNTUK MELAKUKAN PEMBAYARAN</div>
+        
+        <img id="qrCodeImage" src="" alt="QR Code Pembayaran" class="qris-img"> 
+        
+        <div style="text-align:center; margin-top: 15px;">
+          <div style="font-size: 0.9rem; color: #aaa;">Batas Waktu Pembayaran (Expired):</div>
+          <div id="countdownTimer" style="font-size: 1.5rem; font-weight: 800; color: var(--neon);">02:00:00</div>
+        </div>
+        
+        <div style="text-align:center;margin-top:12px;">
+          <button class="qris-close" onclick="closeQR()">Batalkan Pembelian</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // config
+    const TELEGRAM_LINK = 'https://t.me/Farelmod'; 
+    const DEFAULT_NUMBER = '082164306393';
+    const PAYMENT_DURATION_SECONDS = 7200; // 2 jam
+    
+    // Konfigurasi Saweria
+    const SAWERIA_URL = 'https://saweria.co/Farelmods';
+    const ADMIN_FEE_PERCENTAGE = 0.05; // 5% Biaya admin
+    const ADMIN_FEE_MIN = 1000; // Minimal biaya admin Rp 1.000
+
+    // Data Harga Produk (HARUS SAMA DENGAN HARGA DI HTML)
+    const productPrices = {
+        'PANEL UNLIMITED': 7000,
+        'RESSELER PANEL': 12000,
+        'ADMIN PANEL': 15000,
+        'MURBUG VIP': 10000,
+        'PARTNER FAREL': 25000,
+        'MURUNBAND WA': 10000,
+        'MURNOKOS VIP': 10000,
+        'MURSADAP HEADPHONE': 12000,
+        'SCRIPT BUG VIONIX V15': 20000,
+        'SCRIPT THREE BROTHER V6': 30000,
+        'SCRIPT BUG ASHEN CRAWLER V7': 20000,
+        'SCRIPT BUG OTAX FULL UPDATE VIP': 45000,
+        'SCRIPT BUG XVALLOW V9': 25000,
+        'SCRIPT BUG DEEP INVENTUS': 10000,
+        'SCRIPT BUG VANEGETA V15': 20000,
+        'JASA BUAT SC MD': 10000,
+        'JASA BUAT WEB PHISING': 20000,
+        'JASBUG WA': 5000,
+        'JASA BUAT WEB JUALAN': 10000,
+        'SEWA SC BUG 2 BULAN': 15000
+    };
+
+    // Dapatkan elemen-elemen yang diperlukan
+    const btnToggle = document.getElementById('btnToggle');
+    const productsEl = document.getElementById('products');
+    const payAreaEl = document.getElementById('payArea'); 
+    const countdownTimerEl = document.getElementById('countdownTimer');
+    const productNameInQREl = document.getElementById('productNameInQR');
+    const qrCodeImageEl = document.getElementById('qrCodeImage'); 
+    const paymentTotalEl = document.getElementById('paymentTotal'); 
+    let countdownInterval;
+    let isCountdownActive = false; 
+
+    // --- FUNGSI PEMBANTU ---
+
+    function formatRupiah(number) {
+        return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatTime(totalSeconds) {
+      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function calculateTotal(price) {
+        const calculatedFee = Math.ceil(price * ADMIN_FEE_PERCENTAGE);
+        // Biaya admin adalah nilai maksimum antara perhitungan (5%) dan minimum (Rp 1.000)
+        const finalAdminFee = Math.max(calculatedFee, ADMIN_FEE_MIN); 
+        const total = price + finalAdminFee;
+        return total;
+    }
+    
+    function generateSaweriaQR(totalAmount, productName, isDynamic = true) {
+        let link;
+        if (isDynamic) {
+            // Link untuk pembelian produk dengan nominal tertentu
+            link = `${SAWERIA_URL}?amount=${totalAmount}&message=Pembelian ${productName}`;
+        } else {
+            // Link umum (tanpa nominal) untuk "All Payment"
+            link = SAWERIA_URL;
+        }
+        
+        // Gunakan Google Chart API untuk generate QR Code dari link
+        const qrUrl = `https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=${encodeURIComponent(link)}`;
+        qrCodeImageEl.src = qrUrl;
+    }
+
+    // --- FUNGSI UTAMA ---
+
+    function startCountdown() {
+      let timeLeft = PAYMENT_DURATION_SECONDS;
+      
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      isCountdownActive = true;
+      countdownTimerEl.innerText = formatTime(timeLeft);
+      
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        
+        if (timeLeft >= 0) {
+          countdownTimerEl.innerText = formatTime(timeLeft);
+        } else {
+          clearInterval(countdownInterval);
+          isCountdownActive = false;
+          countdownTimerEl.innerText = 'Waktu Habis! Harap ulangi pembelian.';
+          countdownTimerEl.style.color = 'red';
+          setTimeout(closeQR, 5000); 
+        }
+      }, 1000);
+    }
+    
+    // FUNGSI buyNow (Dipanggil dari tombol "Beli Sekarang" produk)
+    function buyNow(productName){
+        const basePrice = productPrices[productName];
+        if (!basePrice) {
+            showToast('Harga produk tidak ditemukan!');
+            return;
+        }
+
+        const totalToPay = calculateTotal(basePrice);
+        
+        // 1. Generate QR Code dinamis dan tampilkan
+        generateSaweriaQR(totalToPay, productName);
+        
+        // 2. Tampilkan pop-up QR (mode Buy Now)
+        openQR(true); 
+        
+        // 3. Isi nama produk dan total bayar
+        productNameInQREl.innerText = productName;
+        paymentTotalEl.innerText = formatRupiah(totalToPay);
+        
+        // 4. Reset warna timer
+        countdownTimerEl.style.color = 'var(--neon)';
+        
+        // 5. Mulai hitungan mundur 2 jam
+        startCountdown();
+
+        showToast('Waktu pembayaran 2 jam dimulai!');
+    }
+
+    // FUNGSI openQR (Dipanggil dari tombol QRIS umum atau buyNow)
+    function openQR(isBuyNow = false){
+        overlay.style.display = 'flex';
+        setTimeout(()=> card.classList.add('show'), 30);
+        document.body.style.overflow = 'hidden';
+        
+        // Jika dipanggil oleh tombol QRIS umum (All Payment)
+        if (!isBuyNow) {
+            if (countdownInterval) clearInterval(countdownInterval);
+            productNameInQREl.innerText = 'Pembayaran Umum';
+            paymentTotalEl.innerText = 'Bebas Nominal';
+            countdownTimerEl.innerText = 'Tanpa Batas Waktu';
+            countdownTimerEl.style.color = '#aaa';
+            
+            // Set QR Code umum
+            generateSaweriaQR(0, '', false);
+        }
+    }
+    
+    function closeQR(){
+      // Hentikan hitungan mundur saat pop-up ditutup
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        isCountdownActive = false;
+      }
+      card.classList.remove('show');
+      setTimeout(()=> { overlay.style.display = 'none'; document.body.style.overflow = 'auto'; }, 260);
+    }
+    
+    // --- FUNGSI LAINNYA ---
+    
+    // toggle products
+    btnToggle.addEventListener('click', function(){
+      const isShown = productsEl.style.display === 'block';
+
+      productsEl.style.display = isShown ? 'none' : 'block';
+      this.innerText = isShown ? 'Tampilkan Produk' : 'Sembunyikan Produk';
+
+      if (isShown) {
+        payAreaEl.classList.remove('hidden');
+      } else {
+        payAreaEl.classList.add('hidden');
+      }
+
+      if(!isShown) setTimeout(()=> productsEl.scrollIntoView({behavior:'smooth', block:'center'}), 160);
+    });
+
+    // copy number + toast
+    function copyNumber(num, label){
+      document.getElementById('numActive').innerText = num;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(num).then(()=> {
+          showToast(label + ' — Nomor ' + num + ' disalin');
+        }).catch(()=> fallbackCopy(num, label));
+      } else {
+        fallbackCopy(num, label);
+      }
+    }
+    function fallbackCopy(text, label){
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); showToast(label + ' — Nomor ' + text + ' disalin (fallback)'); }
+      catch(e){ alert(label + ' — Salin manual: ' + text); }
+      ta.remove();
+    }
+
+    function showToast(msg){
+      const t = document.createElement('div');
+      t.className = 'toast-msg';
+      t.innerText = msg;
+      document.body.appendChild(t);
+      setTimeout(()=> t.style.opacity = 0, 1600);
+      setTimeout(()=> t.remove(), 2000);
+    }
+
+    // set year
+    document.getElementById('year').innerText = new Date().getFullYear();
+
+    // particles (subtle)
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 70, density: { enable: true, value_area: 800 } },
+        color: { value: '#ffffff' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.12, random: true },
+        size: { value: 2.2, random: true },
+        line_linked: { enable: true, distance: 140, color: '#4ecdc4', opacity: 0.05, width: 1 },
+        move: { enable: true, speed: 1.8, out_mode: 'out' }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } },
+        modes: { repulse: { distance: 120 }, push: { particles_nb: 4 } }
+      },
+      retina_detect: true
+    });
+  </script>
+</body>
+</html>
